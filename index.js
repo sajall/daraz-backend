@@ -9,7 +9,6 @@ const app = express();
 // use is a middleware font end sy backend py data bejhny k liy yh line lazmi likhi hy
 app.use(express.json());
 app.use(cors());
-
 app.use(helmet());
 app.use(morgan("common"));
 
@@ -221,41 +220,6 @@ let products = [
   },
 ];
 
-// making products schema
-let productsSchema = mongoose.Schema({
-  category: String,
-  price: Number,
-  src: String,
-});
-
-// creating products model
-
-let productsModel = mongoose.model("product", productsSchema);
-
-// creating documnets
-// const createDocument = async()=>{
-//     const result = await productsModel.insertMany(products);
-// }
-// createDocument();
-
-// calling api for getting products
-app.get("/products", async (req, res) => {
-  const data = await productsModel.find();
-  return res.json(data);
-});
-
-// finding product for product details
-app.put("/find-product", async (req, res) => {
-  console.log(req.query , 'jxioojs hjbxhs xhdsxb hs');
-  try {
-    const product = await productsModel.findOnebyId( {_id : req.query.id});
-   return res.status(200).json(product);
-  } catch (err) {
-    return res.status(500).json(err);
-
-  }
-});
-
 // user schema
 let userSchema = mongoose.Schema(
   {
@@ -268,12 +232,79 @@ let userSchema = mongoose.Schema(
   }
 );
 
-// user model based on upper schema
+// user model
 const usersModel = mongoose.model("user", userSchema);
+
+
+// making products schema
+let productsSchema = mongoose.Schema({
+  category: String,
+  price: String,
+  src: String,
+  userId: {
+    ref:"user",
+    type:mongoose.Schema.Types.ObjectId,
+  }
+});
+
+// creating products model
+let productsModel = mongoose.model("product", productsSchema);
+
+// creating documnets
+// const createDocument = async()=>{
+//     const result = await productsModel.insertMany(products);
+// }
+// createDocument();
+
+
+
+
+
+
+//getting products
+app.get("/products", async (req, res) => {
+  const data = await productsModel.find();
+  return res.json(data);
+});
+
+
+
+
+// finding product for product details
+app.put("/find-product/:id", async (req, res) => {
+  try {
+    const product = await productsModel.findOne( {_id : req.params.id}).populate('userId').exec(); 
+   return res.status(200).json(product);
+  } catch (err) {
+    return res.status(500).json(err);
+
+  }
+});
+
+
+
+
+
+// create product 
+app.post('/create-product' , async(req , res)=>{
+  try {
+    const product = productsModel( req.body);
+   await product.save();
+   return res.status(200).json(product);
+  } catch (err) {
+    return res.status(500).json(err);
+
+  }
+      
+})
+
+
+
+// _______________________users ________________________________
+
 
 // api for creating user in database
 app.post("/create-user", async (req, res) => {
-  //  console.log(req.body , 'user create request');
   try {
     const data = new usersModel(req.body);
     await data.save();
@@ -283,16 +314,21 @@ app.post("/create-user", async (req, res) => {
   }
 });
 
-// getting the users from backend or database on frontend
+
+
+
+// getting users 
 app.get("/user-lao", async (req, res) => {
   const data = await usersModel.find({});
-  // console.log(data);
   res.json({ sucess: true, data: data });
 });
 
+
+
+
+
 // deleting the user
 app.delete("/delete-user/:id", async (req, res) => {
-  // console.log(req.query.id);
   try {
     const data = await usersModel.deleteOne({ _id: req.params.id });
     return res.json({
@@ -305,7 +341,11 @@ app.delete("/delete-user/:id", async (req, res) => {
   }
 });
 
-// updating the user ..i sent id of the user and the new updated data from frontend
+
+
+
+
+// updating the user 
 app.put("/update-user/:id", async (req, res) => {
   const data = await usersModel.findByIdAndUpdate(req.params.id, {
     $set: req.body,
@@ -313,9 +353,11 @@ app.put("/update-user/:id", async (req, res) => {
   res.json({ success: true, data: data });
 });
 
+
+
 // authenticating the user
-// getting user from login page and checking in database if user exists or not
 app.put("/find-user", async (req, res) => {
+  console.log(req.body , 'this is request body nowwwww');
   try {
     const user = await usersModel.findOne({ email: req.body.email });
     if (!user) {
@@ -331,31 +373,28 @@ app.put("/find-user", async (req, res) => {
       " my name is amina",
       { expiresIn: "1w" },
       function (err, token) {
-        res.json({
+      return res.json({
           myToken: token,
           data: user,
           messsage: "login faild , invalid",
         });
       }
     );
-    return res.status(200).json(user);
   } catch (err) {
     return res.status(400).json(err);
   }
 });
 
+
+
+
 // checking the jsonwebtoken in localstorage
-// let data;
 app.post("/check-token", (req, res) => {
-  // console.log(req.body , "this is token");
   jsonwebtoken.verify(
     req.body.token,
     " my name is amina",
     async (err, myData) => {
-      console.log(myData, "this is my data");
-      //    data = myData;
       const user = await usersModel.findOne({ email: myData.email });
-      console.log(user, "this is user");
       res.json({
         success: true,
         data: user,
@@ -363,8 +402,14 @@ app.post("/check-token", (req, res) => {
     }
   );
 });
+
+
+
+
 // for connecting frontend with backend for deployment
 app.use(express.static("./build"));
+
+
 
 // mongoodb connection
 mongoose
