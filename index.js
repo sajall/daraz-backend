@@ -2,6 +2,7 @@ console.log("this is node");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const multer = require("multer");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const jsonwebtoken = require("jsonwebtoken");
@@ -14,6 +15,22 @@ app.use(morgan("common"));
 
 const PORT = process.env.PORT || 6070;
 const mongodb = "mongodb+srv://aminaaslam985:amina123@cluster0.w7bvzq1.mongodb.net/userauthentication";
+
+
+// multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./my-uploads");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage: storage });
+
+
+
 
 // array of products
 let products = [
@@ -272,6 +289,7 @@ app.get("/products", async (req, res) => {
 
 // finding product for product details
 app.put("/find-product/:id", async (req, res) => {
+  console.log(req.params.id , 'this is param');
   try {
     const product = await productsModel.findOne( {_id : req.params.id}).populate('userId').exec(); 
    return res.status(200).json(product);
@@ -286,7 +304,9 @@ app.put("/find-product/:id", async (req, res) => {
 
 
 // create product 
-app.post('/create-product' , async(req , res)=>{
+app.post('/create-product' , upload.single("file") , async(req , res)=>{
+  console.log(req.body , 'this is body');
+  console.log(req.file.path , 'this is file');
   try {
     const product = productsModel( req.body);
    await product.save();
@@ -296,6 +316,20 @@ app.post('/create-product' , async(req , res)=>{
 
   }
       
+})
+
+
+
+// delete product 
+
+app.delete('/delete-product' , async(req , res)=>{
+  console.log(req.query.id , 'this is delete id ');
+  try{
+    const product = await productsModel.deleteOne({_id : req.query.id});
+    return res.status(200).json(product);
+  }catch(error){
+    return res.status(500).json(error);
+  }
 })
 
 
@@ -368,18 +402,20 @@ app.put("/find-user", async (req, res) => {
       return res.status(400).send("wrong Password");
     }
 
-    jsonwebtoken.sign(
-      { email: user.email },
-      " my name is amina",
-      { expiresIn: "1w" },
-      function (err, token) {
-      return res.json({
-          myToken: token,
-          data: user,
-          messsage: "login faild , invalid",
-        });
-      }
-    );
+
+   return res.status(200).json(user);
+    // jsonwebtoken.sign(
+    //   { email: user.email },
+    //   " my name is amina",
+    //   { expiresIn: "1w" },
+    //   function (err, token) {
+    //   return res.status(200).json({
+    //       myToken: token,
+    //       data: user,
+    //       messsage: "login sucessful",
+    //     });
+    //   }
+    // );
   } catch (err) {
     return res.status(400).json(err);
   }
@@ -389,25 +425,25 @@ app.put("/find-user", async (req, res) => {
 
 
 // checking the jsonwebtoken in localstorage
-app.post("/check-token", (req, res) => {
-  jsonwebtoken.verify(
-    req.body.token,
-    " my name is amina",
-    async (err, myData) => {
-      const user = await usersModel.findOne({ email: myData.email });
-      res.json({
-        success: true,
-        data: user,
-      });
-    }
-  );
-});
+// app.post("/check-token", (req, res) => {
+//   jsonwebtoken.verify(
+//     req.body.token,
+//     " my name is amina",
+//     async (err, myData) => {
+//       const user = await usersModel.findOne({ email: myData.email });
+//       res.json({
+//         success: true,
+//         data: user,
+//       });
+//     }
+//   );
+// });
 
 
 
 
 // for connecting frontend with backend for deployment
-app.use(express.static("./build"));
+app.use(express.static( "./server/my-uploads"));
 
 
 
