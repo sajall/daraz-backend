@@ -328,6 +328,8 @@ app.put(`/like-product/:id`, async (req, res) => {
     }
     product.liked = !product.liked
 
+   await product.save()
+
     return res.status(200).json(product);
   } catch (error) {
     return res.status(500).json(error);
