@@ -365,17 +365,11 @@ app.post("/create-user", async (req, res) => {
   }
 });
 
-
-
-
 // getting users 
 app.get("/user-lao", async (req, res) => {
   const data = await usersModel.find({});
   res.json({ sucess: true, data: data });
 });
-
-
-
 
 
 // deleting the user
