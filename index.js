@@ -281,7 +281,7 @@ let productsModel = mongoose.model("product", productsSchema);
 //getting products
 app.get("/products", async (req, res) => {
   const data = await productsModel.find();
-  return res.json(data);
+  return res.json(data );
 });
 
 
@@ -306,7 +306,7 @@ app.put("/find-product/:id", async (req, res) => {
 // create product 
 app.post('/create-product' , upload.single("file") , async(req , res)=>{
   console.log(req.body , 'this is body');
-  console.log(req.file.path , 'this is file');
+  // console.log(req.file.path , 'this is file');
   try {
     const product = productsModel( req.body);
    await product.save();
@@ -332,7 +332,24 @@ app.delete('/delete-product' , async(req , res)=>{
   }
 })
 
+// like product 
+app.get(`/like-product` , async(req , res)=>{
+   console.log(req.query.id , ' this is id of the liked product');
+   try{
+     const product = await productsModel.findOne({_id : req.query.id});
+    if( !product) {
+    return res.status(500).send({message:'product not found'});
+    }
+    if(product){
+      product.abc = true;
+      return res.status(200).json(product);
+    }
+   }catch(error){
+    return res.status(500).json(error);
 
+   }
+
+});
 
 // _______________________users ________________________________
 
