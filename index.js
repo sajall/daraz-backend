@@ -14,8 +14,8 @@ app.use(helmet());
 app.use(morgan("common"));
 
 const PORT = process.env.PORT || 6070;
-const mongodb = "mongodb+srv://aminaaslam985:amina123@cluster0.w7bvzq1.mongodb.net/userauthentication";
-
+const mongodb =
+  "mongodb+srv://aminaaslam985:amina123@cluster0.w7bvzq1.mongodb.net/userauthentication";
 
 // multer
 const storage = multer.diskStorage({
@@ -28,9 +28,6 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
-
-
 
 // array of products
 let products = [
@@ -252,16 +249,16 @@ let userSchema = mongoose.Schema(
 // user model
 const usersModel = mongoose.model("user", userSchema);
 
-
 // making products schema
 let productsSchema = mongoose.Schema({
   category: String,
   price: String,
   src: String,
+  liked: Boolean,
   userId: {
-    ref:"user",
-    type:mongoose.Schema.Types.ObjectId,
-  }
+    ref: "user",
+    type: mongoose.Schema.Types.ObjectId,
+  },
 });
 
 // creating products model
@@ -273,86 +270,69 @@ let productsModel = mongoose.model("product", productsSchema);
 // }
 // createDocument();
 
-
-
-
-
-
 //getting products
 app.get("/products", async (req, res) => {
   const data = await productsModel.find();
-  return res.json(data );
+  return res.json(data);
 });
-
-
-
 
 // finding product for product details
 app.put("/find-product/:id", async (req, res) => {
-  console.log(req.params.id , 'this is param');
+  console.log(req.params.id, "this is param");
   try {
-    const product = await productsModel.findOne( {_id : req.params.id}).populate('userId').exec(); 
-   return res.status(200).json(product);
+    const product = await productsModel
+      .findOne({ _id: req.params.id })
+      .populate("userId")
+      .exec();
+    return res.status(200).json(product);
   } catch (err) {
     return res.status(500).json(err);
-
   }
 });
 
-
-
-
-
-// create product 
-app.post('/create-product' , upload.single("file") , async(req , res)=>{
-  console.log(req.body , 'this is body');
+// create product
+app.post("/create-product", upload.single("file"), async (req, res) => {
+  console.log(req.body, "this is body");
   // console.log(req.file.path , 'this is file');
   try {
-    const product = productsModel( req.body);
-   await product.save();
-   return res.status(200).json(product);
+    const product = productsModel(req.body);
+    await product.save();
+    return res.status(200).json(product);
   } catch (err) {
     return res.status(500).json(err);
-
   }
-      
-})
+});
 
+// delete product
 
-
-// delete product 
-
-app.delete('/delete-product' , async(req , res)=>{
-  console.log(req.query.id , 'this is delete id ');
-  try{
-    const product = await productsModel.deleteOne({_id : req.query.id});
+app.delete("/delete-product", async (req, res) => {
+  console.log(req.query.id, "this is delete id ");
+  try {
+    const product = await productsModel.deleteOne({ _id: req.query.id });
     return res.status(200).json(product);
-  }catch(error){
+  } catch (error) {
     return res.status(500).json(error);
   }
-})
+});
 
-// like product 
-app.get(`/like-product` , async(req , res)=>{
-   console.log(req.query.id , ' this is id of the liked product');
-   try{
-     const product = await productsModel.findOne({_id : req.query.id});
-    if( !product) {
-    return res.status(500).send({message:'product not found'});
+// like product
+app.put(`/like-product/:id`, async (req, res) => {
+  console.log(req.params.id, " this is id of the liked product");
+  try {
+    const product = await productsModel.findByIdAndUpdate(req.params.id, {
+      $set: req.body,
+    });
+    if (!product) {
+      return res.status(500).send({ message: "product not found" });
     }
-    if(product){
-      product.abc = true;
-      return res.status(200).json(product);
-    }
-   }catch(error){
+
+    return res.status(200).json(product);
+  } catch (error) {
     return res.status(500).json(error);
-
-   }
-
+  }
 });
 
 // _______________________users ________________________________
-
 
 // api for creating user in database
 app.post("/create-user", async (req, res) => {
@@ -365,12 +345,11 @@ app.post("/create-user", async (req, res) => {
   }
 });
 
-// getting users 
+// getting users
 app.get("/user-lao", async (req, res) => {
   const data = await usersModel.find({});
   res.json({ sucess: true, data: data });
 });
-
 
 // deleting the user
 app.delete("/delete-user/:id", async (req, res) => {
@@ -386,11 +365,7 @@ app.delete("/delete-user/:id", async (req, res) => {
   }
 });
 
-
-
-
-
-// updating the user 
+// updating the user
 app.put("/update-user/:id", async (req, res) => {
   const data = await usersModel.findByIdAndUpdate(req.params.id, {
     $set: req.body,
@@ -398,11 +373,9 @@ app.put("/update-user/:id", async (req, res) => {
   res.json({ success: true, data: data });
 });
 
-
-
 // authenticating the user
 app.put("/find-user", async (req, res) => {
-  console.log(req.body , 'this is request body nowwwww');
+  console.log(req.body, "this is request body nowwwww");
   try {
     const user = await usersModel.findOne({ email: req.body.email });
     if (!user) {
@@ -413,8 +386,7 @@ app.put("/find-user", async (req, res) => {
       return res.status(400).send("wrong Password");
     }
 
-
-   return res.status(200).json(user);
+    return res.status(200).json(user);
     // jsonwebtoken.sign(
     //   { email: user.email },
     //   " my name is amina",
@@ -432,9 +404,6 @@ app.put("/find-user", async (req, res) => {
   }
 });
 
-
-
-
 // checking the jsonwebtoken in localstorage
 // app.post("/check-token", (req, res) => {
 //   jsonwebtoken.verify(
@@ -450,13 +419,8 @@ app.put("/find-user", async (req, res) => {
 //   );
 // });
 
-
-
-
 // for connecting frontend with backend for deployment
-app.use(express.static( "./server/my-uploads"));
-
-
+app.use(express.static("./server/my-uploads"));
 
 // mongoodb connection
 mongoose
