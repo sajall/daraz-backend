@@ -254,7 +254,6 @@ let productsSchema = mongoose.Schema({
   category: String,
   price: String,
   src: String,
- 
   liked:{
     type: Boolean,
     default: false
@@ -327,6 +326,7 @@ app.put(`/like-product/:id`, async (req, res) => {
     if (!product) {
       return res.status(500).send({ message: "product not found" });
     }
+    product.liked = !product.liked
 
     return res.status(200).json(product);
   } catch (error) {
