@@ -277,7 +277,7 @@ app.get("/products", async (req, res) => {
 });
 
 // finding product for product details
-app.put("/find-product/:id", async (req, res) => {
+app.get("/find-product/:id", async (req, res) => {
   console.log(req.params.id, "this is param");
   try {
     const product = await productsModel
