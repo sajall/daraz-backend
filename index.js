@@ -254,7 +254,11 @@ let productsSchema = mongoose.Schema({
   category: String,
   price: String,
   src: String,
-  liked: Boolean,
+ 
+  liked:{
+    type: Boolean,
+    default: false
+  },
   userId: {
     ref: "user",
     type: mongoose.Schema.Types.ObjectId,
@@ -319,9 +323,7 @@ app.delete("/delete-product", async (req, res) => {
 app.put(`/like-product/:id`, async (req, res) => {
   console.log(req.params.id, " this is id of the liked product");
   try {
-    const product = await productsModel.findByIdAndUpdate(req.params.id, {
-      $set: req.body,
-    });
+    const product = await productsModel.findOne({_id:req.params.id});
     if (!product) {
       return res.status(500).send({ message: "product not found" });
     }
@@ -331,6 +333,7 @@ app.put(`/like-product/:id`, async (req, res) => {
     return res.status(500).json(error);
   }
 });
+
 
 // _______________________users ________________________________
 
