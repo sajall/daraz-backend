@@ -249,7 +249,7 @@ let userSchema = mongoose.Schema(
 // user model
 const usersModel = mongoose.model("user", userSchema);
 
-// making products schema
+// products schema
 let productsSchema = mongoose.Schema({
   category: String,
   price: String,
@@ -264,7 +264,7 @@ let productsSchema = mongoose.Schema({
   },
 });
 
-// creating products model
+//products model
 let productsModel = mongoose.model("product", productsSchema);
 
 // creating documnets
@@ -296,7 +296,6 @@ app.get("/find-product/:id", async (req, res) => {
 // create product
 app.post("/create-product", upload.single("file"), async (req, res) => {
   console.log(req.body, "this is body");
-  // console.log(req.file.path , 'this is file');
   try {
     const product = productsModel(req.body);
     await product.save();
@@ -307,7 +306,6 @@ app.post("/create-product", upload.single("file"), async (req, res) => {
 });
 
 // delete product
-
 app.delete("/delete-product", async (req, res) => {
   console.log(req.query.id, "this is delete id ");
   try {
@@ -339,7 +337,7 @@ app.put(`/like-product/:id`, async (req, res) => {
 
 // _______________________users ________________________________
 
-// api for creating user in database
+//create user
 app.post("/create-user", async (req, res) => {
   try {
     const data = new usersModel(req.body);
@@ -356,7 +354,7 @@ app.get("/user-lao", async (req, res) => {
   res.json({ sucess: true, data: data });
 });
 
-// deleting the user
+// deleting user
 app.delete("/delete-user/:id", async (req, res) => {
   try {
     const data = await usersModel.deleteOne({ _id: req.params.id });
@@ -370,7 +368,7 @@ app.delete("/delete-user/:id", async (req, res) => {
   }
 });
 
-// updating the user
+// updating user
 app.put("/update-user/:id", async (req, res) => {
   const data = await usersModel.findByIdAndUpdate(req.params.id, {
     $set: req.body,
@@ -378,7 +376,7 @@ app.put("/update-user/:id", async (req, res) => {
   res.json({ success: true, data: data });
 });
 
-// authenticating the user
+// authenticating user
 app.put("/find-user", async (req, res) => {
   console.log(req.body, "this is request body nowwwww");
   try {
