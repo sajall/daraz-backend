@@ -440,17 +440,4 @@ mongoose
     console.log("cannot connect to database", err);
   });
 
-// for importing exporting
-// module.exports hmesha aik object leta hy jis mn jo jo chezein export krni hun wo rakh dety hyn
-// module.exports = {
-// x:10,
-// y:20
-// }
 
-// dossri file jis mn import krna hy us mn ja k import krny k liy
-// const (variable ka nam mostly jis file sy import kr rhy  hun us file k nam py hi rkhty hyn) app = require(file ka nam './app')
-// const app = require('./app')
-// poori file ko require kr liya hy jo kuch pichli file sy export k object mn rkha hoga wo app k variable mn store ho jy ga then
-// apny mtlb ki chez app.dash kr k nikal skty hyn
-// __dirname >> for checking the name of your directry
-// __filename >> also provides us the file name you are in 5
